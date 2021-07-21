@@ -1,6 +1,6 @@
 
 # -*- coding: utf-8 -*-
-import os
+import os, threading
 from aiohttp import web
 import logging
 from unittest.mock import MagicMock, patch
@@ -10,10 +10,11 @@ from cbpi.api import *
 from cbpi.api.config import ConfigType
 from cbpi.api.base import CBPiBase
 from scd30_i2c import SCD30
+import time
 
 logger = logging.getLogger(__name__)
 
-
+cache = {}
 
 class SCD30_Config(CBPiExtension):
 
@@ -21,9 +22,9 @@ class SCD30_Config(CBPiExtension):
         self.cbpi = cbpi
         self._task = asyncio.create_task(self.init_sensor())
 
-
     async def init_sensor(self):
         global SCD30_Active
+        SCD30_Active=False
         await self.scd30_interval()
         self.scd30 = SCD30()
         self.Interval = self.cbpi.config.get("scd30_interval", 5)
@@ -57,7 +58,10 @@ class SCD30_Config(CBPiExtension):
             logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
             logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
             logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
-            pass
+            self.readsensor = ReadThread(self.Interval, self.scd30)
+            self.readsensor.daemon = False
+            self.readsensor.start()
+
 
     async def scd30_interval(self):
         global scd30_interval
@@ -74,39 +78,63 @@ class SCD30_Config(CBPiExtension):
             except:
                 logger.warning('Unable to update database')
 
+class ReadThread(threading.Thread):
+
+    def __init__(self,interval,scd30: SCD30):
+        threading.Thread.__init__(self)
+        self.running = True
+        self.Interval = int(interval)
+        self.scd30 = scd30
+
+    def shutdown(self):
+        pass
+    
+    def stop(self):
+        pass
+
+    def run(self):
+        global cache
+        while True:
+            if self.scd30.get_data_ready():
+                measurement = self.scd30.read_measurement()
+                if measurement is not None:
+                    co2, temp, rh = measurement
+                    timestamp = time.time()
+                    cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
+                time.sleep(self.Interval)
+            else:
+                time.sleep(0.2)
+
+
 @parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor.")])
 class SCD30Sensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(SCD30Sensor, self).__init__(cbpi, id, props)
         self.value = 0
-        self.SCD30_Active=False
-        self.Interval = self.cbpi.config.get("scd30_interval", 5)
-        self.scd30 = SCD30()
         self.Type = self.props.get("Type","CO2")
+        self.time_old = 0
         global SCD30_Active
+        global cache
 
     async def run(self):
         while self.running is True:
-            if SCD30_Active == True:
-                if self.scd30.get_data_ready():
-                    measurement = self.scd30.read_measurement()
-                    if measurement is not None:
-                        co2, temp, rh = measurement
-#                        print(f"CO2: {co2:.2f}ppm, temp: {temp:.2f}'C, rh: {rh:.2f}%")
-                        if self.Type == "CO2":
-                            self.value = round(float(co2),2)
-                        elif self.Type == "Temperature":
-                            self.value = round(float(temp),2)
-                        elif self.Type == "Relative Humidity":
-                            self.value = round(float(rh),2)
-                    await asyncio.sleep(self.Interval)
-                else:
-                    await asyncio.sleep(0.2)
-
-                self.log_data(self.value)
+            try:
+                if (float(cache['Time']) > float(self.time_old)):
+                    self.time_old = float(cache['Time'])
+                    if self.Type == "CO2":
+                        self.value = round(float(cache['CO2']),2)
+                    elif self.Type == "Temperature":
+                        self.value = round(float(cache['Temperature']),2)
+                    elif self.Type == "Relative Humidity":
+                        self.value = round(float(cache['RH']),2)
+                    self.log_data(self.value)
                 self.push_update(self.value)
-#                await asyncio.sleep(1)
+
+            except Exception as e:
+                pass
+            await asyncio.sleep(1)
+
    
     def get_state(self):
         return dict(value=self.value)
