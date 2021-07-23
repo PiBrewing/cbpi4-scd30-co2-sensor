@@ -58,9 +58,13 @@ class SCD30_Config(CBPiExtension):
             logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
             logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
             logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
-            self.readsensor = ReadThread(self.Interval, self.scd30)
-            self.readsensor.daemon = False
-            self.readsensor.start()
+            loop = asyncio.get_event_loop()
+            try:
+                asyncio.ensure_future(self.ReadSensor())
+                loop.run_forever()
+            finally:
+                loop.close()
+
 
 
     async def scd30_interval(self):
@@ -78,21 +82,9 @@ class SCD30_Config(CBPiExtension):
             except:
                 logger.warning('Unable to update database')
 
-class ReadThread(threading.Thread):
 
-    def __init__(self,interval,scd30: SCD30):
-        threading.Thread.__init__(self)
-        self.running = True
-        self.Interval = int(interval)
-        self.scd30 = scd30
-
-    def shutdown(self):
-        pass
-    
-    def stop(self):
-        pass
-
-    def run(self):
+    async def ReadSensor(self):
+        logging.info("Starting scd30 ReadSensor Loop")
         global cache
         while True:
             if self.scd30.get_data_ready():
@@ -101,9 +93,9 @@ class ReadThread(threading.Thread):
                     co2, temp, rh = measurement
                     timestamp = time.time()
                     cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
-                time.sleep(self.Interval)
+                await asyncio.sleep(self.Interval)
             else:
-                time.sleep(0.2)
+                await asyncio.sleep(0.2)
 
 
 @parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor.")])
