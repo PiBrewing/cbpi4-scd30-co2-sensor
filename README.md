@@ -21,7 +21,7 @@ Each parameter has to be added as individual sensor.
 	
 ### Usage:
 
-- Configure the update intervall of the sensor data in the cbpi global settings. Although shorter cycles ar possible, 30 or 60 seconds should be more than sufficient.
+- Configure the update interval of the sensor data in the cbpi global settings. Although shorter cycles ar possible, 30 or 60 seconds should be more than sufficient.
 
 ![Global Sensor Interval Settings](https://github.com/avollkopf/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-settings-interval.png?raw=true)
 
