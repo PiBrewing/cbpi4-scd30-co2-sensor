@@ -8,10 +8,10 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(name='cbpi4-scd30_CO2_Sensor',
       version='0.0.1',
-      description='CraftBeerPi Plugin',
+      description='CraftBeerPi4 Plugin for SCD30 based CO2 Sensor',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',
-      url='',
+      url='https://github.com/avollkopf/cbpi4-scd30-co2-sensor',
       license='GPLv3',
       include_package_data=True,
       package_data={

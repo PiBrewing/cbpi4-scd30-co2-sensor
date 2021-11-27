@@ -77,6 +77,7 @@ class SCD30_Config(CBPiExtension):
                                                                                                             {"label": "5s", "value": 5},
                                                                                                             {"label": "10s", "value": 10},
                                                                                                             {"label": "15s", "value": 15},
+                                                                                                            {"label": "30s", "value": 30},
                                                                                                             {"label": "60s", "value": 60}])
                 scd30_interval = self.cbpi.config.get("scd30_interval", None)
             except:
