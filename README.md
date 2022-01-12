@@ -37,4 +37,5 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ### Changelog:
 
-- 23-07-21: (0.0.1)
+- 12.01.21: (0.0.2) Reduction of mqtt traffic
+- 23-07-21: (0.0.1) Initial commit
