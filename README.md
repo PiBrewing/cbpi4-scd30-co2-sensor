@@ -37,6 +37,7 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ### Changelog:
 
+- 10.05.22: (0.0.4) Removed cbpi requirement
 - 16.01.22: (0.0.3) adaption for cbpi 4.0.1.2
 - 12.01.22: (0.0.2) Reduction of mqtt traffic
 - 23.07.21: (0.0.1) Initial commit
