@@ -17,7 +17,6 @@ Each parameter has to be added as individual sensor.
 ### Installation: 
 - sudo pip3 install cbpi4-scd30_CO2_Sensor
 - or install from repo: sudo pip3 install https://github.com/avollkopf/cbpi4-scd30-co2-sensor/archive/main.zip
-- cbpi add cbpi4-scd30_CO2_Sensor
 	
 ### Usage:
 
