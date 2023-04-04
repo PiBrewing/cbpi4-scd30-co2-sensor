@@ -23,6 +23,11 @@ class SCD30_Config(CBPiExtension):
         self._task = asyncio.create_task(self.init_sensor())
 
     async def init_sensor(self):
+        plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30-CO2-Sensor")
+        self.version=plugin[0].get("Version","0.0.0")
+
+        self.scd30_update = self.cbpi.config.get("scd30_update", None)
+
         global SCD30_Active
         SCD30_Active=False
         await self.scd30_interval()
@@ -73,16 +78,36 @@ class SCD30_Config(CBPiExtension):
         if scd30_interval is None:
             logger.info("INIT scd30_intervall")
             try:
-                await self.cbpi.config.add("scd30_interval", 5, ConfigType.SELECT, "SCD30 Readout Interval", [{"label": "2s","value": 2},
+                await self.cbpi.config.add("scd30_interval", 5, type=ConfigType.SELECT, description="SCD30 Readout Interval",
+                                                                                                    options= [{"label": "2s","value": 2},
                                                                                                             {"label": "5s", "value": 5},
                                                                                                             {"label": "10s", "value": 10},
                                                                                                             {"label": "15s", "value": 15},
                                                                                                             {"label": "30s", "value": 30},
-                                                                                                            {"label": "60s", "value": 60}])
+                                                                                                            {"label": "60s", "value": 60}],
+                                                                                                            source='cbpi4-scd30-CO2-Sensor')
                 scd30_interval = self.cbpi.config.get("scd30_interval", None)
             except:
                 logger.warning('Unable to update database')
+        else:
+            if self.scd30_update == None or self.scd30_update != self.version:
+                try:
+                    await self.cbpi.config.add("scd30_interval", scd30_interval, type=ConfigType.SELECT, description="SCD30 Readout Interval",
+                                                                                                    options= [{"label": "2s","value": 2},
+                                                                                                            {"label": "5s", "value": 5},
+                                                                                                            {"label": "10s", "value": 10},
+                                                                                                            {"label": "15s", "value": 15},
+                                                                                                            {"label": "30s", "value": 30},
+                                                                                                            {"label": "60s", "value": 60}],
+                                                                                                            source='cbpi4-scd30-CO2-Sensor')
 
+                except:
+                    logger.warning('Unable to update database')
+        if self.scd30_update == None or self.scd30_update != self.version:
+            try:
+                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING,source="hidden")
+            except:
+                logger.warning('Unable to update database')
 
     async def ReadSensor(self):
         logging.info("Starting scd30 ReadSensor Loop")
