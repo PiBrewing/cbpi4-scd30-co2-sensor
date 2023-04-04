@@ -106,7 +106,7 @@ class SCD30_Config(CBPiExtension):
 
         if self.scd30_update == None or self.scd30_update != self.version:
             try:
-                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING,source='hidden')
+                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING,description="SCD30 Version update",source='hidden')
             except Exception as e:
                 logger.warning('Unable to update database')
                 logger.warning(e)
