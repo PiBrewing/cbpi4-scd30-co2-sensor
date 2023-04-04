@@ -7,13 +7,14 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='cbpi4-scd30_CO2_Sensor',
-      version='0.0.6.a1',
+      version='0.0.6.a2',
       description='CraftBeerPi4 Plugin for SCD30 based CO2 Sensor',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',
       url='https://github.com/avollkopf/cbpi4-scd30-co2-sensor',
       license='GPLv3',
       include_package_data=True,
+      keywords='globalsettings',
       package_data={
         # If any package contains *.txt or *.rst files, include them:
       '': ['*.txt', '*.rst', '*.yaml'],
