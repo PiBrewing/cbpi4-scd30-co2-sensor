@@ -103,11 +103,13 @@ class SCD30_Config(CBPiExtension):
 
                 except:
                     logger.warning('Unable to update database')
+
         if self.scd30_update == None or self.scd30_update != self.version:
             try:
-                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING,source="hidden")
-            except:
+                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING,source='hidden')
+            except Exception as e:
                 logger.warning('Unable to update database')
+                logger.warning(e)
 
     async def ReadSensor(self):
         logging.info("Starting scd30 ReadSensor Loop")
