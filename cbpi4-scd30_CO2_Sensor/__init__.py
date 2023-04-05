@@ -25,8 +25,9 @@ class SCD30_Config(CBPiExtension):
     async def init_sensor(self):
         plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30_CO2_Sensor")
         self.version=plugin[0].get("Version","0.0.0")
+        self.name=plugin[0].get("Name","cbpi4-scd30_CO2_Sensor")
 
-        self.scd30_update = self.cbpi.config.get("scd30_update", None)
+        self.scd30_update = self.cbpi.config.get(self.name+"_update", None)
 
         global SCD30_Active
         SCD30_Active=False
@@ -85,7 +86,7 @@ class SCD30_Config(CBPiExtension):
                                                                                                             {"label": "15s", "value": 15},
                                                                                                             {"label": "30s", "value": 30},
                                                                                                             {"label": "60s", "value": 60}],
-                                                                                                            source='cbpi4-scd30-CO2-Sensor')
+                                                                                                            source=self.name)
                 scd30_interval = self.cbpi.config.get("scd30_interval", None)
             except:
                 logger.warning('Unable to update database')
@@ -99,14 +100,14 @@ class SCD30_Config(CBPiExtension):
                                                                                                             {"label": "15s", "value": 15},
                                                                                                             {"label": "30s", "value": 30},
                                                                                                             {"label": "60s", "value": 60}],
-                                                                                                            source='cbpi4-scd30-CO2-Sensor')
+                                                                                                            source=self.name)
 
                 except:
                     logger.warning('Unable to update database')
 
         if self.scd30_update == None or self.scd30_update != self.version:
             try:
-                 await self.cbpi.config.add("scd30_update", self.version,type=ConfigType.STRING, description='SCD30 Version update', source='hidden')
+                 await self.cbpi.config.add(self.name+"_update", self.version,type=ConfigType.STRING, description='SCD30 Version update', source='hidden')
             except Exception as e:
                 logger.warning('Unable to update database')
                 logger.warning(e)
