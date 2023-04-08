@@ -23,9 +23,9 @@ class SCD30_Config(CBPiExtension):
         self._task = asyncio.create_task(self.init_sensor())
 
     async def init_sensor(self):
-        plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30_CO2_Sensor")
+        plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30-CO2-Sensor")
         self.version=plugin[0].get("Version","0.0.0")
-        self.name=plugin[0].get("Name","cbpi4-scd30_CO2_Sensor")
+        self.name=plugin[0].get("Name","cbpi4-scd30-CO2-Sensor")
 
         self.scd30_update = self.cbpi.config.get(self.name+"_update", None)
 
