@@ -36,6 +36,7 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ### Changelog:
 
+- 10.06.23: (0.0.6) bump version to release
 - 02.06.23: (0.0.6.rc1) added cbpi4 requirement
 - 16.04.23: (0.0.6.a6) fixed bug in parameter generation
 - 04.04.23: (0.0.6.a5) test for plugin settings selection branch
