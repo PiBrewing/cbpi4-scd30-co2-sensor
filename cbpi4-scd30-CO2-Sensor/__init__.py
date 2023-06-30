@@ -69,6 +69,7 @@ class SCD30_Config(CBPiExtension):
                 asyncio.ensure_future(self.ReadSensor())
                 loop.run_forever()
             finally:
+                loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
 
 
