@@ -36,6 +36,7 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ### Changelog:
 
+- 28.07.23: (0.0.7.a2) add exception handling to read loop
 - 30.06.23: (0.0.7.a1) test closing loop to avoid errors
 - 10.06.23: (0.0.6) bump version to release
 - 02.06.23: (0.0.6.rc1) added cbpi4 requirement

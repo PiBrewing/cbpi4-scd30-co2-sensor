@@ -119,15 +119,18 @@ class SCD30_Config(CBPiExtension):
         logging.info("Starting scd30 ReadSensor Loop")
         global cache
         while True:
-            if self.scd30.get_data_ready():
-                measurement = self.scd30.read_measurement()
-                if measurement is not None:
-                    co2, temp, rh = measurement
-                    timestamp = time.time()
-                    cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
-                await asyncio.sleep(self.Interval)
-            else:
-                await asyncio.sleep(0.2)
+            try:
+                if self.scd30.get_data_ready():
+                    measurement = self.scd30.read_measurement()
+                    if measurement is not None:
+                        co2, temp, rh = measurement
+                        timestamp = time.time()
+                        cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
+                    await asyncio.sleep(self.Interval)
+                else:
+                    await asyncio.sleep(0.2)
+            except Exception as e:
+                logging.error("Error while readig SCD30 Sensor: {}".format(e))
 
 
 @parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor.")])
