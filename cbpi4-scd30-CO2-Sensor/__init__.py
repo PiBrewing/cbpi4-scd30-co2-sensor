@@ -144,7 +144,7 @@ class SCD30Sensor(CBPiSensor):
         self.Type = self.props.get("Type","CO2")
         self.AlarmLimit = float(self.props.get("AlarmLimit",-9999))
         self.time_old = 0
-        self.SendAlarm=True if self.AlarmLimit != -999 else False
+        self.SendAlarm=True if self.AlarmLimit != -9999 else False
         global SCD30_Active
         global cache
 
