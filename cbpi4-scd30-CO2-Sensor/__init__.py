@@ -142,7 +142,7 @@ class SCD30Sensor(CBPiSensor):
         super(SCD30Sensor, self).__init__(cbpi, id, props)
         self.value = 0
         self.Type = self.props.get("Type","CO2")
-        self.AlarmLimit = float(self.props.get("AlarmLimit",-999))
+        self.AlarmLimit = float(self.props.get("AlarmLimit",-9999))
         self.time_old = 0
         self.SendAlarm=True if self.AlarmLimit != -999 else False
         global SCD30_Active
@@ -176,6 +176,8 @@ class SCD30Sensor(CBPiSensor):
                         if self.SendAlarm:
                             self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
                             self.SendAlarm=False
+                    if self.value < self.AlarmLimit and self.SendAlarm == False:
+                        self.SendAlarm = True
 
                 self.push_update(self.value,False)
                 #self.cbpi.ws.send(dict(topic="sensorstate", id=self.id, value=self.value))
