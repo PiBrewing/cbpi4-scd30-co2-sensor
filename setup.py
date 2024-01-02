@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='cbpi4-scd30-CO2-Sensor',
-      version='0.0.7.a2',
+      version='0.0.8.a1',
       description='CraftBeerPi4 Plugin for SCD30 based CO2 Sensor',
       author='Alexander Vollkopf',
       author_email='avollkopf@web.de',

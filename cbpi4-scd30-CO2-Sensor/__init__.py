@@ -1,14 +1,15 @@
 
 # -*- coding: utf-8 -*-
-import os, threading
-from aiohttp import web
+#import os, threading
+#from aiohttp import web
 import logging
-from unittest.mock import MagicMock, patch
+#from unittest.mock import MagicMock, patch
+from cbpi.api.dataclasses import NotificationAction, NotificationType
 import asyncio
-import random
+#import random
 from cbpi.api import *
 from cbpi.api.config import ConfigType
-from cbpi.api.base import CBPiBase
+#from cbpi.api.base import CBPiBase
 from scd30_i2c import SCD30
 import time
 
@@ -133,16 +134,30 @@ class SCD30_Config(CBPiExtension):
                 logging.error("Error while readig SCD30 Sensor: {}".format(e))
 
 
-@parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor.")])
+@parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor."),
+            Property.Number("AlarmLimit",description="Limit for an Alarm (e.g. CO2 concentration). Reset is done via Sensor Actions")])
 class SCD30Sensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(SCD30Sensor, self).__init__(cbpi, id, props)
         self.value = 0
         self.Type = self.props.get("Type","CO2")
+        self.AlarmLimit = float(self.props.get("AlarmLimit",-999))
         self.time_old = 0
+        self.SendAlarm=True if self.AlarmLimit != -999 else False
         global SCD30_Active
         global cache
+
+    @action(key="Reset Alarm", parameters=[])
+    async def Reset(self, **kwargs):
+        self.reset()
+        logging.info("Reset Alarm for SCD30Sensor")
+
+    def reset(self):
+        self.SendAlarm = True
+    
+    async def ok(self):
+        pass
 
     async def run(self):
         while self.running is True:
@@ -157,6 +172,10 @@ class SCD30Sensor(CBPiSensor):
                         self.value = round(float(cache['RH']),2)
                     self.log_data(self.value)
                     self.push_update(self.value)
+                    if self.value > self.AlarmLimit:
+                        if self.SendAlarm:
+                            self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
+                            self.SendAlarm=False
 
                 self.push_update(self.value,False)
                 #self.cbpi.ws.send(dict(topic="sensorstate", id=self.id, value=self.value))
