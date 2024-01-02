@@ -68,7 +68,7 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ## Changelog:
 
-- 02.01.23: (0.0.8) Add Sensoralarm (single and continuous)
+- 02.01.24: (0.0.8) Add Sensoralarm (single and continuous)
 - 28.07.23: (0.0.7.a2) add exception handling to read loop
 - 30.06.23: (0.0.7.a1) test closing loop to avoid errors
 - 10.06.23: (0.0.6) bump version to release
