@@ -172,7 +172,7 @@ class SCD30Sensor(CBPiSensor):
                         self.value = round(float(cache['RH']),2)
                     self.log_data(self.value)
                     self.push_update(self.value)
-                    if self.value > self.AlarmLimit:
+                    if self.value > self.AlarmLimit and self.AlarmLimit != -9999:
                         if self.SendAlarm:
                             self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
                             self.SendAlarm=False
