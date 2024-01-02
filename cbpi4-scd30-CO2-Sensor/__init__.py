@@ -1,14 +1,15 @@
 
 # -*- coding: utf-8 -*-
-import os, threading
-from aiohttp import web
+#import os, threading
+#from aiohttp import web
 import logging
-from unittest.mock import MagicMock, patch
+#from unittest.mock import MagicMock, patch
+from cbpi.api.dataclasses import NotificationAction, NotificationType
 import asyncio
-import random
+#import random
 from cbpi.api import *
 from cbpi.api.config import ConfigType
-from cbpi.api.base import CBPiBase
+#from cbpi.api.base import CBPiBase
 from scd30_i2c import SCD30
 import time
 
@@ -69,6 +70,7 @@ class SCD30_Config(CBPiExtension):
                 asyncio.ensure_future(self.ReadSensor())
                 loop.run_forever()
             finally:
+                loop.run_until_complete(loop.shutdown_asyncgens())
                 loop.close()
 
 
@@ -118,27 +120,48 @@ class SCD30_Config(CBPiExtension):
         logging.info("Starting scd30 ReadSensor Loop")
         global cache
         while True:
-            if self.scd30.get_data_ready():
-                measurement = self.scd30.read_measurement()
-                if measurement is not None:
-                    co2, temp, rh = measurement
-                    timestamp = time.time()
-                    cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
-                await asyncio.sleep(self.Interval)
-            else:
-                await asyncio.sleep(0.2)
+            try:
+                if self.scd30.get_data_ready():
+                    measurement = self.scd30.read_measurement()
+                    if measurement is not None:
+                        co2, temp, rh = measurement
+                        timestamp = time.time()
+                        cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
+                    await asyncio.sleep(self.Interval)
+                else:
+                    await asyncio.sleep(0.2)
+            except Exception as e:
+                logging.error("Error while readig SCD30 Sensor: {}".format(e))
 
 
-@parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor.")])
+@parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor."),
+            Property.Number("AlarmLimit",description="Limit for an Alarm (e.g. CO2 concentration). Reset is done via Sensor Actions"),
+            Property.Select("AlarmType", options=["Single", "Continuous"], description="Single or Continuous Alarm with every reading.")])
 class SCD30Sensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(SCD30Sensor, self).__init__(cbpi, id, props)
         self.value = 0
         self.Type = self.props.get("Type","CO2")
+        self.AlarmType = self.props.get("AlarmType","Single")
+        self.AlarmLimit = float(self.props.get("AlarmLimit",-9999))
         self.time_old = 0
+        self.SendAlarm=True if self.AlarmLimit != -9999 else False
         global SCD30_Active
         global cache
+
+    @action(key="Reset Alarm", parameters=[])
+    async def Reset(self, **kwargs):
+        if self.AlarmType != "Continuous":
+            self.reset()
+            logging.info("Reset Alarm for SCD30Sensor")
+        pass
+
+    def reset(self):
+        self.SendAlarm = True
+    
+    async def ok(self):
+        pass
 
     async def run(self):
         while self.running is True:
@@ -153,6 +176,15 @@ class SCD30Sensor(CBPiSensor):
                         self.value = round(float(cache['RH']),2)
                     self.log_data(self.value)
                     self.push_update(self.value)
+                    if self.value > self.AlarmLimit and self.AlarmLimit != -9999:
+                        if self.SendAlarm:
+                            if self.AlarmType != "Continuous":
+                                self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
+                                self.SendAlarm=False
+                            else:
+                                self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING)
+                    if self.value < self.AlarmLimit and self.SendAlarm == False:
+                        self.SendAlarm = True
 
                 self.push_update(self.value,False)
                 #self.cbpi.ws.send(dict(topic="sensorstate", id=self.id, value=self.value))
