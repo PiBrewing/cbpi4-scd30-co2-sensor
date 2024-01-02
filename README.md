@@ -25,21 +25,21 @@ Plugin will add system a sensor to monitor for instance CO2 monitoring in your f
     - No additional alarm is raised until you reset the alarm or until the sensor value falls below the alarm limit and is rising again above the limit.
     - You can reset the alarm and then a new alarm is raised in single mode. Therefore you need to use the actions menu of your sensor.
 
-    ![Single Alarm](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-singlealarm?raw=true)
+    ![Single Alarm](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-singlealarm.png?raw=true)
 
     - You need to activate Actions for your Sensor in the dashboard (Please see CraftbeerPi Documentation) to activate the Action menu (3 dots)
 
-     ![3 dots](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-actionmenu?raw=true)   
+     ![3 dots](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-actionmenu.png?raw=true)   
 
     - With The action menu, you can reset the sensor alarm:
 
-    ![Actions](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-actions?raw=true)   
+    ![Actions](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-actions.png?raw=true)   
 
 - Continuous:
     - Notification is send / Alarm is played on every sensor reading if sensor value is above limit
     - Notification is shown on the bottom right and does not persist on the screen.
 
-    ![Continuous Alarm](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-continuousalarm?raw=true)
+    ![Continuous Alarm](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-scd30-continuousalarm.png?raw=true)
 
 
 Each parameter has to be added as individual sensor.
