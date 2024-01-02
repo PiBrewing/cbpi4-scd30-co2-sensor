@@ -135,13 +135,15 @@ class SCD30_Config(CBPiExtension):
 
 
 @parameters([Property.Select("Type", options=["CO2", "Temperature", "Relative Humidity"], description="Select type of data to register for this sensor."),
-            Property.Number("AlarmLimit",description="Limit for an Alarm (e.g. CO2 concentration). Reset is done via Sensor Actions")])
+            Property.Number("AlarmLimit",description="Limit for an Alarm (e.g. CO2 concentration). Reset is done via Sensor Actions"),
+            Property.Select("AlarmType", options=["Single", "Continuous"], description="Single or Continuous Alarm with every reading.")])
 class SCD30Sensor(CBPiSensor):
     
     def __init__(self, cbpi, id, props):
         super(SCD30Sensor, self).__init__(cbpi, id, props)
         self.value = 0
         self.Type = self.props.get("Type","CO2")
+        self.AlarmType = self.props.get("AlarmType","Single")
         self.AlarmLimit = float(self.props.get("AlarmLimit",-9999))
         self.time_old = 0
         self.SendAlarm=True if self.AlarmLimit != -9999 else False
@@ -150,8 +152,10 @@ class SCD30Sensor(CBPiSensor):
 
     @action(key="Reset Alarm", parameters=[])
     async def Reset(self, **kwargs):
-        self.reset()
-        logging.info("Reset Alarm for SCD30Sensor")
+        if self.AlarmType != "Continuous":
+            self.reset()
+            logging.info("Reset Alarm for SCD30Sensor")
+        pass
 
     def reset(self):
         self.SendAlarm = True
@@ -174,8 +178,11 @@ class SCD30Sensor(CBPiSensor):
                     self.push_update(self.value)
                     if self.value > self.AlarmLimit and self.AlarmLimit != -9999:
                         if self.SendAlarm:
-                            self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
-                            self.SendAlarm=False
+                            if self.AlarmType != "Continuous":
+                                self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING, action=[NotificationAction("OK", self.ok)])
+                                self.SendAlarm=False
+                            else:
+                                self.cbpi.notify("SCD30 Sensor Alarm", "{}  (Value: {}) is above limit of {}".format(self.Type,self.value, self.AlarmLimit), NotificationType.WARNING)
                     if self.value < self.AlarmLimit and self.SendAlarm == False:
                         self.SendAlarm = True
 
