@@ -47,8 +47,11 @@ Each parameter has to be added as individual sensor.
 ![Multiple Sensors](https://github.com/pibrewing/cbpi4-scd30-co2-sensor/blob/main/cbpi4-multiple-scd30.png?raw=true)
 
 ## Installation: 
-- pipx runpip cbpi4 install cbpi4-scd30_CO2_Sensor
-- or install from repo: pipx runpip cbpi4 install https://github.com/pibrewing/cbpi4-scd30-co2-sensor/archive/main.zip
+
+Please have a look at the [Craftbeerpi4 Documentation](https://openbrewing.gitbook.io/craftbeerpi4_support/readme/plugin-installation)
+
+- Package name: cbpi4-scd30_CO2_Sensor
+- PAckage link: https://github.com/pibrewing/cbpi4-scd30-co2-sensor/archive/main.zip
 	
 ## Usage:
 
