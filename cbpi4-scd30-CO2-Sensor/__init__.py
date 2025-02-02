@@ -65,13 +65,14 @@ class SCD30_Config(CBPiExtension):
             logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
             logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
             logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
-            loop = asyncio.get_event_loop()
+            #loop = asyncio.get_event_loop()
             try:
-                asyncio.ensure_future(self.ReadSensor())
-                loop.run_forever()
+                asyncio.create_task(self.ReadSensor())
+                #loop.run_forever()
             finally:
-                loop.run_until_complete(loop.shutdown_asyncgens())
-                loop.close()
+                #loop.run_until_complete(loop.shutdown_asyncgens())
+                #loop.close()
+                pass
 
 
 
