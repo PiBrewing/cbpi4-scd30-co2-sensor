@@ -12,7 +12,6 @@ from cbpi.api.config import ConfigType
 #from cbpi.api.base import CBPiBase
 from scd30_i2c import SCD30
 import time
-import nest_asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,6 @@ class SCD30_Config(CBPiExtension):
 
     def __init__(self,cbpi):
         self.cbpi = cbpi
-        nest_asyncio.apply()
         self._task = asyncio.create_task(self.init_sensor())
 
     async def init_sensor(self):
@@ -67,7 +65,7 @@ class SCD30_Config(CBPiExtension):
             logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
             logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
             logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
-            loop = asyncio.get_event_loop()
+            loop = asyncio.new_event_loop()
             try:
                 asyncio.ensure_future(self.ReadSensor())
                 loop.run_forever()
