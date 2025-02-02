@@ -23,7 +23,6 @@ setup(name='cbpi4-scd30-CO2-Sensor',
         install_requires=[
         'smbus2',
         'scd30_i2c',
-        'nest_asyncio==1.6.0',
   ],
   long_description=long_description,
   long_description_content_type='text/markdown'
