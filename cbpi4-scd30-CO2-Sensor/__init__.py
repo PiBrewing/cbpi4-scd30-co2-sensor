@@ -69,11 +69,12 @@ class SCD30_Config(CBPiExtension):
             try:
                 asyncio.create_task(self.ReadSensor())
                 #loop.run_forever()
-            finally:
-                #loop.run_until_complete(loop.shutdown_asyncgens())
-                #loop.close()
-                pass
+            except Exception as e:
+                logging.error(f"Error while starting sensor readout: {e}")
+            except KeyboardInterrupt:
+                logging.info("Exiting...")
 
+    
 
 
     async def scd30_interval(self):
