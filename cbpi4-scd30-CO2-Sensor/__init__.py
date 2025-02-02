@@ -12,6 +12,7 @@ from cbpi.api.config import ConfigType
 #from cbpi.api.base import CBPiBase
 from scd30_i2c import SCD30
 import time
+import nest_asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class SCD30_Config(CBPiExtension):
         self._task = asyncio.create_task(self.init_sensor())
 
     async def init_sensor(self):
+        nest_asyncio.apply()
         plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30-CO2-Sensor")
         self.version=plugin[0].get("Version","0.0.0")
         self.name=plugin[0].get("Name","cbpi4-scd30-CO2-Sensor")
