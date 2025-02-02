@@ -22,10 +22,10 @@ class SCD30_Config(CBPiExtension):
 
     def __init__(self,cbpi):
         self.cbpi = cbpi
+        nest_asyncio.apply()
         self._task = asyncio.create_task(self.init_sensor())
 
     async def init_sensor(self):
-        nest_asyncio.apply()
         plugin = await self.cbpi.plugin.load_plugin_list("cbpi4-scd30-CO2-Sensor")
         self.version=plugin[0].get("Version","0.0.0")
         self.name=plugin[0].get("Name","cbpi4-scd30-CO2-Sensor")
