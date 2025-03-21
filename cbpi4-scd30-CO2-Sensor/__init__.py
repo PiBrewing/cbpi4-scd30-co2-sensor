@@ -31,9 +31,11 @@ class SCD30_Config(CBPiExtension):
         global SCD30_Active
         SCD30_Active = False
         await self.scd30_interval()
+        self.Interval = self.cbpi.config.get("scd30_interval", 5)
         i2c = busio.I2C(board.SCL, board.SDA)
         self.scd30 = adafruit_scd30.SCD30(i2c)
-        self.Interval = self.cbpi.config.get("scd30_interval", 5)
+        self.scd30.self_calibration_enabled = True
+        self.scd30.scd_measurement_interval = self.Interval
         retries = 30
         logging.info("Probing SCD30 sensor...")
         ready = None
