@@ -10,8 +10,11 @@ import asyncio
 from cbpi.api import *
 from cbpi.api.config import ConfigType
 #from cbpi.api.base import CBPiBase
-from scd30_i2c import SCD30
+#from scd30_i2c import SCD30
 import time
+import board
+import busio
+import adafruit_scd30
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +36,15 @@ class SCD30_Config(CBPiExtension):
         global SCD30_Active
         SCD30_Active=False
         await self.scd30_interval()
-        self.scd30 = SCD30()
+        i2c = busio.I2C(board.SCL, board.SDA,frequency=50000)
+        self.scd30 = adafruit_scd30.SCD30(i2c)
         self.Interval = self.cbpi.config.get("scd30_interval", 5)
         retries = 30
         logging.info("Probing SCD30 sensor...")
         ready = None
         while ready is None and retries:
             try:
-                ready = self.scd30.get_data_ready()
+                ready = self.scd30.data_available
                 SCD30_Active=True
             except OSError:
                 # The sensor may need a couple of seconds to boot up after power-on
@@ -52,19 +56,19 @@ class SCD30_Config(CBPiExtension):
             logging.error("Timed out waiting for SCD30.")
             pass 
         if ready is not None:    
-            logging.info("Link to sensor established.")
-            logging.info("Getting firmware version...")
-            logging.info(f"Sensor firmware version: {self.scd30.get_firmware_version()}")
-            self.scd30.set_measurement_interval(self.Interval)
-            logging.info("Enabling automatic self-calibration...")
-            self.scd30.set_auto_self_calibration(active=True)
-            logging.info("Starting periodic measurement...")
-            self.scd30.start_periodic_measurement()
-            await asyncio.sleep(self.Interval)
+            #logging.info("Link to sensor established.")
+            #logging.info("Getting firmware version...")
+            #logging.info(f"Sensor firmware version: {self.scd30.get_firmware_version()}")
+            #self.scd30.set_measurement_interval(self.Interval)
+            #logging.info("Enabling automatic self-calibration...")
+            #self.scd30.set_auto_self_calibration(active=True)
+            #logging.info("Starting periodic measurement...")
+            #self.scd30.start_periodic_measurement()
+            #await asyncio.sleep(self.Interval)
             SCD30_Active=True
-            logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
-            logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
-            logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
+            #logging.info(f"ASC status: {self.scd30.get_auto_self_calibration_active()}")
+            #logging.info(f"Measurement interval: {self.scd30.get_measurement_interval()}s")
+            #logging.info(f"Temperature offset: {self.scd30.get_temperature_offset()}'C")
             #loop = asyncio.get_event_loop()
             try:
                 asyncio.create_task(self.ReadSensor())
@@ -123,12 +127,12 @@ class SCD30_Config(CBPiExtension):
         global cache
         while True:
             try:
-                if self.scd30.get_data_ready():
-                    measurement = self.scd30.read_measurement()
-                    if measurement is not None:
-                        co2, temp, rh = measurement
-                        timestamp = time.time()
-                        cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
+                if self.scd30.data_available:
+                    temp = self.scd30.temperature
+                    rh = self.scd30.relative_humidity
+                    co2 = self.scd30.CO2
+                    timestamp = time.time()
+                    cache = {'Time': timestamp,'Temperature': temp, 'CO2': co2, 'RH': rh}
                     await asyncio.sleep(self.Interval)
                 else:
                     await asyncio.sleep(0.2)
