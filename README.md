@@ -71,6 +71,7 @@ The sensor is connected via I2C and has the address 0x61. The user just needs to
 
 ## Changelog:
 
+- 13.10.25: (0.1.1) Add pyproject.toml file to support pip 25.3+
 - 21.03.25: (0.1.0) Usage of adafruit circuit python driver for SCD30
 - 02.01.24: (0.0.8) Add Sensoralarm (single and continuous)
 - 28.07.23: (0.0.7.a2) add exception handling to read loop
